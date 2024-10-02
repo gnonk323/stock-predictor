@@ -4,9 +4,9 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
  
 # import stock dataset (2010 - 2024)
-sp500_stocks = pd.read_csv('sp500_stocks.csv')
-sp500_companies = pd.read_csv('sp500_companies.csv')
-sp500_index = pd.read_csv('sp500_index.csv')
+sp500_stocks = pd.read_csv('data/sp500_stocks.csv')
+sp500_companies = pd.read_csv('data/sp500_companies.csv')
+sp500_index = pd.read_csv('data/sp500_index.csv')
 
 stock_df = pd.merge(sp500_stocks, sp500_companies, on='Symbol', how='inner')
 stock_df = pd.merge(stock_df, sp500_index, on='Date', how='inner')
