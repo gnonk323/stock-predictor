@@ -1,12 +1,18 @@
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import pandas as pd
 import joblib
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+model_path = os.path.join(BASE_DIR, 'stock_model_new.pkl')
 
 # Load the pre-trained model
-model = joblib.load('stock_model_new.pkl')
+model = joblib.load(model_path)
 
 # Load the S&P 500 companies data to get sector and industry information
-sp500_companies = pd.read_csv('data/sp500_companies.csv', usecols=['Symbol', 'Sector', 'Industry'])
+sp500_companies_path = os.path.join(BASE_DIR, 'data', 'sp500_companies.csv')
+sp500_companies = pd.read_csv(sp500_companies_path, usecols=['Symbol', 'Sector', 'Industry'])
 
 def predict_stock_change(open_price, stock_symbol, headlines):
     # Get industry and sector from the sp500_companies DataFrame
@@ -62,14 +68,14 @@ def predict_stock_change(open_price, stock_symbol, headlines):
 
     return predicted_change[0]  # Return the predicted percent change
 
-# Example usage
-stock_symbol = 'AAPL'
-open_price = 150.00
-current_headlines = [
-    "Apple releases new iPhone models",
-    "Market analysts predict strong quarterly earnings for Apple",
-    "Concerns over supply chain issues for Apple"
-]
+# # Example usage
+# stock_symbol = 'AAPL'
+# open_price = 150.00
+# current_headlines = [
+#     "Apple releases new iPhone models",
+#     "Market analysts predict strong quarterly earnings for Apple",
+#     "Concerns over supply chain issues for Apple"
+# ]
 
-predicted_percent_change = predict_stock_change(open_price, stock_symbol, current_headlines)
-print(f"Predicted percent change for {stock_symbol}: {predicted_percent_change:.2f}%")
+# predicted_percent_change = predict_stock_change(open_price, stock_symbol, current_headlines)
+# print(f"Predicted percent change for {stock_symbol}: {predicted_percent_change:.2f}%")

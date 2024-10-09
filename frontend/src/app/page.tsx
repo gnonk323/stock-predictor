@@ -17,18 +17,19 @@ import {
   ArrowUp,
   ArrowDown,
 } from "lucide-react"
+import { useState, useEffect } from "react"
+import axios from "axios"
 
 
 interface RowProps {
   ticker: string
   companyName: string
-  currentPrice: string
-  change: string
+  openPrice: string
   sentiment: string
   projectedChange: string
 }
 
-function Row({ ticker, companyName, currentPrice, change, sentiment, projectedChange }: RowProps) {
+function Row({ ticker, companyName, openPrice, sentiment, projectedChange }: RowProps) {
   const badgeVariant = sentiment === "Positive" ? "positive" : sentiment === "Negative" ? "negative" : "neutral"
   return (
     <TableRow>
@@ -36,13 +37,7 @@ function Row({ ticker, companyName, currentPrice, change, sentiment, projectedCh
         <p className="font-semibold">{ticker}</p>
         <p className="text-sm">{companyName}</p>
       </TableCell>
-      <TableCell>{currentPrice}</TableCell>
-      <TableCell>
-        <div className="flex items-center">
-          {change.includes("+") ? <ArrowUp size={16} className="mr-2 text-green-500" /> : <ArrowDown size={16} className="mr-2 text-red-500" />}
-          <span className={change.includes("+") ? "text-green-500" : "text-red-500"}>{change}</span>
-        </div>
-      </TableCell>
+      <TableCell>{openPrice}</TableCell>
       <TableCell>
         <Badge variant={badgeVariant}>
           {badgeVariant === "positive" ? <Plus size={16} className="mr-2" /> : badgeVariant === "negative" ? <Minus size={16} className="mr-2" /> : <Equal size={16} className="mr-2" />}
@@ -51,8 +46,8 @@ function Row({ ticker, companyName, currentPrice, change, sentiment, projectedCh
       </TableCell>
       <TableCell>
       <div className="flex items-center">
-          {projectedChange.includes("+") ? <ArrowUp size={16} className="mr-2 text-green-500" /> : <ArrowDown size={16} className="mr-2 text-red-500" />}
-          <span className={projectedChange.includes("+") ? "text-green-500" : "text-red-500"}>{projectedChange}</span>
+          {/* {projectedChange.includes("+") ? <ArrowUp size={16} className="mr-2 text-green-500" /> : <ArrowDown size={16} className="mr-2 text-red-500" />} */}
+          <span>{projectedChange}</span>
         </div>
       </TableCell>
     </TableRow>
@@ -60,7 +55,72 @@ function Row({ ticker, companyName, currentPrice, change, sentiment, projectedCh
 }
 
 
+interface StockPrediction {
+  symbol: string
+  companyName: string
+  openPrice: string
+  predictedChange: string
+}
+
 export default function Home() {
+
+  const stocks: { [key: string]: string } = {
+    'AAPL': 'Apple',
+    'NVDA': 'NVIDIA',
+    'MSFT': 'Microsoft',
+    'AMZN': 'Amazon',
+    'META': 'Meta',
+    'GOOGL': 'Alphabet',
+    'TSLA': 'Tesla',
+    'ORCL': 'Oracle',
+    'AMD': 'AMD',
+    'NFLX': 'Netflix'
+  }
+
+  const [stockPredictions, setStockPredictions] = useState<StockPrediction[]>([])
+
+  const [message, setMessage] = useState<string>("")
+
+  useEffect(() => {
+    const fetchStockPredictions = async () => {
+      try {
+        const promises = Object.keys(stocks).map(async (symbol) => {
+          const companyName = stocks[symbol];
+          const response = await axios.get(`http://localhost:8000/get_stock_prediction`, {
+            params: {
+              company_name: companyName,
+              symbol: symbol
+            }
+          });
+          return {
+            symbol: symbol,
+            companyName: companyName,
+            openPrice: response.data.open_price,
+            predictedChange: response.data.predicted_change
+          };
+        });
+        const results = await Promise.all(promises);
+        setStockPredictions(results);
+      } catch (e) {
+        console.error("Error fetching stock predictions", e);
+      }
+    }
+
+    fetchStockPredictions();
+
+
+    // const fetchMessage = async () => {
+    //   try {
+    //     const response = await axios.get(`http://localhost:8000/test`);
+    //     setMessage(response.data.message);
+    //   } catch (e) {
+    //     console.error("Error fetching message", e);
+    //   }
+    // }
+
+    // fetchMessage();
+  }, [])
+
   return (
     <div className="flex justify-center mx-28 mt-8 flex-col">
       <div className="flex justify-between w-full">
@@ -68,42 +128,28 @@ export default function Home() {
         <SearchInput placeholder="Search" />
       </div>
       <br />
+      <h1>{message}</h1>
       <div>
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Symbol</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Change</TableHead>
+              <TableHead>Open Price</TableHead>
               <TableHead>Sentiment</TableHead>
               <TableHead>Projected Change</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            <Row
-              ticker="AAPL"
-              companyName="Apple Inc."
-              currentPrice="$145.86"
-              change="+0.86"
-              sentiment="Positive"
-              projectedChange="+0.50"
-            />
-            <Row
-              ticker="TSLA"
-              companyName="Tesla Inc."
-              currentPrice="$678.90"
-              change="-0.90"
-              sentiment="Negative"
-              projectedChange="-1.20"
-            />
-            <Row
-              ticker="AMZN"
-              companyName="Amazon.com Inc."
-              currentPrice="$3,372.20"
-              change="+2.20"
-              sentiment="Neutral"
-              projectedChange="+0.04"
-            />
+            {stockPredictions.map((prediction) => (
+              <Row
+                key={prediction.symbol}
+                ticker={prediction.symbol}
+                companyName={stocks[prediction.symbol]}
+                openPrice={prediction.openPrice}
+                sentiment="not implemented"
+                projectedChange={prediction.predictedChange}
+              />
+            ))}
           </TableBody>
         </Table>
       </div>
