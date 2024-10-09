@@ -6,7 +6,7 @@ import joblib
 model = joblib.load('stock_model_new.pkl')
 
 # Load the S&P 500 companies data to get sector and industry information
-sp500_companies = pd.read_csv('sp500_companies.csv', usecols=['Symbol', 'Sector', 'Industry'])
+sp500_companies = pd.read_csv('data/sp500_companies.csv', usecols=['Symbol', 'Sector', 'Industry'])
 
 def predict_stock_change(open_price, stock_symbol, headlines):
     # Get industry and sector from the sp500_companies DataFrame
