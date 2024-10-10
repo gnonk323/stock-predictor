@@ -15,8 +15,10 @@ def read_predictions(company_name: str = Query(...), symbol: str = Query(...)):
         if not headlines:
             raise ValueError(f"Failed to retrieve headlines for {company_name}")
 
-        predicted_change = predict_stock_change(open_price, symbol, [article['title'] for article in headlines])
-        return {"company_name": company_name, "symbol": symbol, "open_price": open_price, "predicted_change": predicted_change}
+        predicted_change, sentiment_score = predict_stock_change(open_price, symbol, [article['title'] for article in headlines])
+        predicted_change = round(predicted_change, 2)
+        predicted_change = str(predicted_change) + "%"
+        return {"company_name": company_name, "symbol": symbol, "open_price": open_price, "sentiment_score": sentiment_score, "predicted_change": predicted_change}
     except ValueError as e:
         print(f"Error in prediction: {e}")
         return {"error": str(e)}

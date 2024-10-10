@@ -4,7 +4,7 @@ import time
 
 
 # Alpha Vantage API key
-ALPHA_API_KEY = '96OEKSPVHU9ET4JC'
+ALPHA_API_KEY = '3N6HX109J7Q2LA00'
 ALPHA_BASE_URL = 'https://www.alphavantage.co/query'
 
 NEWS_API_KEY = '5f6334174d7e439ca4179367e1175217'
@@ -20,6 +20,7 @@ def get_stock_open_price(symbol):
     }
     response = requests.get(ALPHA_BASE_URL, params=params)
     data = response.json()
+    print(data)
     
     # Extracting the latest open price from the time series data
     try:
@@ -49,7 +50,7 @@ def get_top_headlines(query):
     
 
 # testing
-if __name__ == "__main__":
-    aapl_open_price = get_stock_open_price('AAPL')
-    print(f"AAPL open price: {aapl_open_price}")
-    print(f"type: {type(aapl_open_price)}")
+# if __name__ == "__main__":
+#     aapl_open_price = get_stock_open_price('AAPL')
+#     print(f"AAPL open price: {aapl_open_price}")
+#     print(f"type: {type(aapl_open_price)}")

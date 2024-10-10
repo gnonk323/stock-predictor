@@ -2,6 +2,7 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import pandas as pd
 import joblib
 import os
+from stocks_info import get_top_headlines
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -66,16 +67,27 @@ def predict_stock_change(open_price, stock_symbol, headlines):
     # Predict using the trained model
     predicted_change = model.predict(input_features)
 
-    return predicted_change[0]  # Return the predicted percent change
+    return predicted_change[0], new_data['sentiment_score'].values[0]  # Return the predicted percent change & sentiment score
 
-# # Example usage
-# stock_symbol = 'AAPL'
-# open_price = 150.00
-# current_headlines = [
-#     "Apple releases new iPhone models",
-#     "Market analysts predict strong quarterly earnings for Apple",
-#     "Concerns over supply chain issues for Apple"
-# ]
 
-# predicted_percent_change = predict_stock_change(open_price, stock_symbol, current_headlines)
-# print(f"Predicted percent change for {stock_symbol}: {predicted_percent_change:.2f}%")
+if __name__ == "__main__":
+
+    stocks = {
+        'AAPL': ['Apple', 227.78],
+        'NVDA': ['NVIDIA', 131.91],
+        'MSFT': ['Microsoft', 415.23],
+        'AMZN': ['Amazon', 187.13],
+        'META': ['Meta', 587.57],
+        'GOOGL': ['Alphabet', 162.11],
+        'TSLA': ['Tesla', 241.81],
+        'ORCL': ['Oracle', 177.65],
+        'AMD': ['AMD', 169.76],
+        'NFLX': ['Netflix', 723.29]
+    }
+
+    for stock in stocks:
+        headlines = get_top_headlines(stocks[stock][0])
+        stocks[stock].append(headlines)
+        open_price = stocks[stock][1]
+        predicted_change, sentiment_score = predict_stock_change(open_price, stock, [article['title'] for article in headlines])
+        print(f"Predicted change for {stocks[stock][0]} ({stock}): {predicted_change:.2f}%, with a sentiment score of {sentiment_score:.2f}")
